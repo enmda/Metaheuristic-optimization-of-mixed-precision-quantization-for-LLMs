@@ -1,0 +1,12 @@
+# torch must come from the CUDA index:
+#   pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+transformers==5.22.2
+accelerate==1.15.0
+datasets==5.1.0
+numpy==2.5.3
+scikit-learn==1.9.1
+pandas==3.1.1
+matplotlib==3.11.2
+PyYAML==6.0.3
+tqdm==4.70.1

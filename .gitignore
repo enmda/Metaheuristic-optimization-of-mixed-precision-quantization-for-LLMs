@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.env
+# experiment outputs (keep folder, ignore heavy artifacts)
+results/*
+!results/.gitkeep
+*.pt
+*.safetensors
+*.bin
+# HF caches if redirected locally
+.cache/
+docs/*recap*.txt
