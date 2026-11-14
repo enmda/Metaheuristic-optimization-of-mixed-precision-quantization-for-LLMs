@@ -9,11 +9,13 @@ eval:
   subset: wikitext-2-raw-v1
   split: test
   seq_len: 512          # short to fit in 4 GB VRAM
-  max_samples: null     # null = full split; set an int for fast search-time eval
+  max_samples: null     # null = full split (final evaluation)
+  search_windows: 32    # evenly spaced windows for fast evaluation during search
 
 quant:
   bit_choices: [2, 3, 4, 8, 16]
   group_size: 128
   weight_only: true
+  skip: [lm_head]       # tied to the input embedding -> keep fp16
 
 seed: 42

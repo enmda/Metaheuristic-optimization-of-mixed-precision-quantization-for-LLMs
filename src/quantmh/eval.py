@@ -66,20 +66,30 @@ def load_wikitext_tokens(tokenizer, subset="wikitext-2-raw-v1", split="test"):
     return tokenizer(text, return_tensors="pt").input_ids[0]
 
 
+def spread_windows(n_total: int, k: int) -> list[int]:
+    """`k` evenly spaced window indices out of `n_total` (fixed, deterministic)."""
+    return torch.linspace(0, n_total - 1, k).round().long().tolist()
+
+
 @torch.no_grad()  # no gradients needed -> saves a lot of memory
-def perplexity(model, tokens, seq_len=512, max_samples=None, chunk=128):
+def perplexity(model, tokens, seq_len=512, max_samples=None, chunk=128,
+               window_ids=None):
     """Perplexity over non-overlapping windows of `seq_len` tokens.
 
+    `window_ids` selects a subset of windows (fast proxy evaluation);
+    otherwise the first `max_samples` windows (all if None) are used.
     The vocabulary projection (lm_head) is applied in chunks of positions so
     the full [seq_len x vocab] logits tensor never exists in fp32 at once.
     """
     device = next(model.parameters()).device
-    n_windows = tokens.numel() // seq_len
-    if max_samples is not None:
-        n_windows = min(n_windows, max_samples)
+    if window_ids is None:
+        n_windows = tokens.numel() // seq_len
+        if max_samples is not None:
+            n_windows = min(n_windows, max_samples)
+        window_ids = range(n_windows)
 
     total_nll, total_count = 0.0, 0
-    for i in tqdm(range(n_windows), desc="ppl", leave=False):
+    for i in tqdm(window_ids, desc="ppl", leave=False):
         ids = tokens[i * seq_len : (i + 1) * seq_len].unsqueeze(0).to(device)
         hidden = model.model(input_ids=ids).last_hidden_state  # [1, T, H]
 
